@@ -1,19 +1,12 @@
-# Target programs
-programs := \
-	queue_tester_example.x \
-	uthread_hello.x \
-	uthread_yield.x
+## TODO: Phase 1
+CC := gcc
+CFLAGS := -Wall -Wextra -Werror -MMD
+CFLAGS += -g
 
-# User-level thread library
-UTHREADLIB := libuthread
-UTHREADPATH := ../$(UTHREADLIB)
-libuthread := $(UTHREADPATH)/$(UTHREADLIB).a
+targets := queue
+objs := queue.o
 
-# Default rule
-all: $(programs)
-
-# Avoid builtin rules and variables
-MAKEFLAGS += -rR
+lib := libuthread.a
 
 # Don't print the commands unless explicitly requested with `make V=1`
 ifneq ($(V),1)
@@ -21,59 +14,28 @@ Q = @
 V = 0
 endif
 
-# Current directory
-CUR_PWD := $(shell pwd)
-
-# Define compilation toolchain
-CC	= gcc
-
-# General gcc options
-CFLAGS	:= -Wall -Wextra -Werror
-CFLAGS	+= -pipe
-## Debug flag
-ifneq ($(D),1)
-CFLAGS	+= -O2
-else
-CFLAGS	+= -g
-endif
-## Include path
-CFLAGS 	+= -I$(UTHREADPATH)
-## Dependency generation
-CFLAGS	+= -MMD
-
-# Linker options
-LDFLAGS := -L$(UTHREADPATH) -luthread
-
-# Application objects to compile
-objs := $(patsubst %.x,%.o,$(programs))
-
-# Include dependencies
-deps := $(patsubst %.o,%.d,$(objs))
+all: $(lib)
+deps := $(patsubst %.o, %.d, $(objs))
 -include $(deps)
+# Avoid builtin rules and variables
+MAKEFLAGS += -rR
 
-# Rule for libuthread.a
-$(libuthread): FORCE
-	@echo "MAKE	$@"
-	$(Q)$(MAKE) V=$(V) D=$(D) -C $(UTHREADPATH)
+# Static library target
+libuthread.a: $(OBJS)
+	ar rcs $@ $^
 
-# Generic rule for linking final applications
-%.x: %.o $(libuthread)
-	@echo "LD	$@"
-	$(Q)$(CC) -o $@ $< $(LDFLAGS)
-
-# Generic rule for compiling objects
+# Compile source files
+$(targets): $(objs)
+	@echo "CC $@"
+	$(Q) $(CC) $(CFLAGS) -o $@ $<
 %.o: %.c
-	@echo "CC	$@"
-	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
-
-# Cleaning rule
-clean: FORCE
-	@echo "CLEAN	$(CUR_PWD)"
-	$(Q)$(MAKE) V=$(V) D=$(D) -C $(UTHREADPATH) clean
-	$(Q)rm -rf $(objs) $(deps) $(programs)
-
-# Keep object files around
-.PRECIOUS: %.o
-.PHONY: FORCE
-FORCE:
+	@echo "CC $@"
+	$(Q) $(CC) $(CFLAGS) -c -o $@ $<
+	
+$(lib): $(objs)
+	@echo "CC $@"
+	$(Q) ar rcs $@ $^
+clean:
+	@echo "clean"
+	$(Q) rm -f $(targets) $(objs) $(deps) $(lib)
 
