@@ -53,9 +53,6 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->first = (struct node*) malloc(sizeof(struct node));
 		queue->first->data = data;
 		queue->last = queue->first;
-        bool exists = queue->first->data != NULL;
-        printf("%d\n",exists);
-        printf("A\n");
         
 	}
 	
@@ -66,9 +63,7 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->first->next = queue->last; // update first so its next points to last
 		queue->last->prev = queue->first; // update last so its prev points to first
         queue->length++;
-        bool exists = queue->first->data != NULL;
-        printf("%d\n",exists);
-        printf("B\n");
+    
 	}
 
 	else {
@@ -77,9 +72,7 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->last->next->prev = queue->last;
 		queue->last = queue->last->next;
         queue->length++;
-        bool exists = queue->first->data != NULL;
-        printf("%d\n",exists);
-        printf("C\n");
+
 	}
     
 	return 0;
@@ -98,6 +91,7 @@ int queue_dequeue(queue_t queue, void **data)
         queue->length--;
 	    free(queue->last);
         queue->last = NULL;
+        queue->first = NULL;
     }
     else {
         queue->last = queue->last->prev;
