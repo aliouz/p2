@@ -38,17 +38,31 @@ void test_queue_simple(void)
 
 }
 
-void test_create(void)
+void test_destroy(void)
 {
-	fprintf(stderr, "*** TEST delete ***\n");
+	fprintf(stderr, "*** TEST delete with an unitialized queue ***\n");
+	queue_t q = NULL;
+	TEST_ASSERT(queue_destroy(q) == -1);
 
-	//TEST_ASSERT(queue_delete() != NULL);
+	fprintf(stderr, "*** TEST delete with an unempty queue ***\n");
+
+	q = queue_create();
+	int data = 3, *ptr;
+	queue_enqueue(q, &data);
+	TEST_ASSERT(queue_destroy(q) == -1);
+
+	fprintf(stderr, "*** TEST delete with an empty queue ***\n");
+
+	queue_dequeue(q, (void**)&ptr);
+	TEST_ASSERT(queue_destroy(q) == 0);
+	
+	
 }
 
 int main(void)
 {
 	test_create();
 	test_queue_simple();
-
+	test_destroy();
 	return 0;
 }
