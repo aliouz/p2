@@ -28,6 +28,7 @@ queue_t queue_create(void)
   queue_t newQueue = (queue_t) malloc(sizeof(struct queue));
   newQueue->first = NULL;
   newQueue->last = NULL;
+  newQueue->length = 0;
   return newQueue;
 
 }
@@ -52,7 +53,6 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->first = (struct node*) malloc(sizeof(struct node));
 		queue->first->data = data;
 		queue->last = queue->first;
-        queue->length = 0;
         bool exists = queue->first->data != NULL;
         printf("%d\n",exists);
         printf("A\n");
