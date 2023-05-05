@@ -81,7 +81,7 @@ int queue_dequeue(queue_t queue, void **data)
 		return -1;
 	}
     
-	data = queue->last->data;
+	*data = queue->last->data;
 	queue->last = queue->last->prev;
     queue->length--;
 	free(queue->last->next);
