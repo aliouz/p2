@@ -130,7 +130,6 @@ int queue_delete(queue_t queue, void *data) {
             }
 
             free(curr);
-            queue->length--;
             return 0;
         }
 
@@ -148,8 +147,9 @@ int queue_iterate(queue_t queue, queue_func_t func)
     
     struct node *curr = queue->first;
     while(curr != NULL){
-        func(queue,curr->data);
+        void* next = curr->data;
         curr = curr->next;
+        func(queue,next);
     }
     return 0;
 }
