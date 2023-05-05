@@ -1,7 +1,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdbool.h>
+#include <stdio.h>
 #include "queue.h"
 
 
@@ -52,6 +53,10 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->first->data = data;
 		queue->last = queue->first;
         queue->length = 0;
+        bool exists = queue->first->data != NULL;
+        printf("%d\n",exists);
+        printf("A\n");
+        
 	}
 	
 	else if (queue->first == queue->last) {
@@ -61,6 +66,9 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->first->next = queue->last; // update first so its next points to last
 		queue->last->prev = queue->first; // update last so its prev points to first
         queue->length++;
+        bool exists = queue->first->data != NULL;
+        printf("%d\n",exists);
+        printf("B\n");
 	}
 
 	else {
@@ -69,8 +77,11 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->last->next->prev = queue->last;
 		queue->last = queue->last->next;
         queue->length++;
-
+        bool exists = queue->first->data != NULL;
+        printf("%d\n",exists);
+        printf("C\n");
 	}
+    
 	return 0;
 }
 
@@ -82,9 +93,17 @@ int queue_dequeue(queue_t queue, void **data)
 	}
     
 	*data = queue->last->data;
-	queue->last = queue->last->prev;
-    queue->length--;
-	free(queue->last->next);
+    // case 1: 1 element in queue
+    if (queue->first == queue->last) {
+        queue->length--;
+	    free(queue->last);
+        queue->last = NULL;
+    }
+    else {
+        queue->last = queue->last->prev;
+        queue->length--;
+        free(queue->last->next);
+    }
 	return 0;
 
 }

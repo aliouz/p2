@@ -30,11 +30,19 @@ void test_queue_simple(void)
 	queue_t q;
 
 	fprintf(stderr, "*** TEST queue_simple ***\n");
-
+	//ptr = &data;
 	q = queue_create();
 	queue_enqueue(q, &data);
 	queue_dequeue(q, (void**)&ptr);
 	TEST_ASSERT(ptr == &data);
+
+}
+
+void test_create(void)
+{
+	fprintf(stderr, "*** TEST delete ***\n");
+
+	//TEST_ASSERT(queue_delete() != NULL);
 }
 
 int main(void)

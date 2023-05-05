@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "array": "c",
+        "vector": "c",
+        "stdbool.h": "c"
+    }
+}
