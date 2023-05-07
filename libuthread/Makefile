@@ -3,8 +3,8 @@ CC := gcc
 CFLAGS := -Wall -Wextra -Werror -MMD
 CFLAGS += -g
 
-targets := queue
-objs := queue.o
+targets := queue uthread context
+objs := queue.o uthread.o context.o
 
 lib := libuthread.a
 

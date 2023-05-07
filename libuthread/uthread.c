@@ -10,131 +10,89 @@
 #include "uthread.h"
 #include "queue.h"
 
+enum threadState {Ready, Running, Blocked, Zombie};
 
+queue_t ready_queue;
+queue_t zombie_queue;
 
- 
-// Data structure to represent a stack
-struct stack
+typedef struct uthread_tcb {
+	void *stack;
+	int state;
+	uthread_ctx_t *context; 
+}thread;
+
+thread *current_thread;
+
+thread *uthread_current(void)
 {
-    int maxsize;    // define max capacity of the stack
-    int top;
-    int *items;
-};
- 
-// Utility function to initialize the stack
-struct stack* newStack(int capacity)
-{
-    struct stack *pt = (struct stack*)malloc(sizeof(struct stack));
- 
-    pt->maxsize = capacity;
-    pt->top = -1;
-    pt->items = (int*)malloc(sizeof(int) * capacity);
- 
-    return pt;
-}
- 
-// Utility function to return the size of the stack
-int size(struct stack *pt) {
-    return pt->top + 1;
-}
- 
-// Utility function to check if the stack is empty or not
-int isEmpty(struct stack *pt) {
-    return pt->top == -1;                   // or return size(pt) == 0;
-}
- 
-// Utility function to check if the stack is full or not
-int isFull(struct stack *pt) {
-    return pt->top == pt->maxsize - 1;      // or return size(pt) == pt->maxsize;
-}
- 
-// Utility function to add an element `x` to the stack
-void push(struct stack *pt, int x)
-{
-    // check if the stack is already full. Then inserting an element would
-    // lead to stack overflow
-    if (isFull(pt))
-    {
-        printf("Overflow\nProgram Terminated\n");
-        exit(EXIT_FAILURE);
-    }
- 
-    printf("Inserting %d\n", x);
- 
-    // add an element and increment the top's index
-    pt->items[++pt->top] = x;
-}
- 
-// Utility function to return the top element of the stack
-int peek(struct stack *pt)
-{
-    // check for an empty stack
-    if (!isEmpty(pt)) {
-        return pt->items[pt->top];
-    }
-    else {
-        exit(EXIT_FAILURE);
-    }
-}
- 
-// Utility function to pop a top element from the stack
-int pop(struct stack *pt)
-{
-    // check for stack underflow
-    if (isEmpty(pt))
-    {
-        printf("Underflow\nProgram Terminated\n");
-        exit(EXIT_FAILURE);
-    }
- 
-    printf("Removing %d\n", peek(pt));
- 
-    // decrement stack size by 1 and (optionally) return the popped element
-    return pt->items[pt->top--];
+    return current_thread;
 }
 
-
-
-
-struct uthread_tcb {
-	/* TODO Phase 2 */
-	struct stack threadStack;
-	enum threadState {Ready, Running, Blocked, Zombie};
-	int cpuRegisters[]; 
-};
-
-struct uthread_tcb *uthread_current(void)
-{
-	/* TODO Phase 2/3 */
+thread *intialize_thread(int state){
+    thread *curr_thread = malloc(sizeof(thread));
+    curr_thread->stack = uthread_ctx_alloc_stack();
+  
+	curr_thread->state = state;
+	curr_thread->context = malloc(sizeof(uthread_ctx_t));
+    return curr_thread;
 }
 
 void uthread_yield(void)
 {
-	/* TODO Phase 2 */
+    if (queue_length(ready_queue) != 0) {
+        thread *next_thread;
+        queue_dequeue(ready_queue, (void**)&next_thread);
+        queue_enqueue(ready_queue, current_thread);
+        uthread_ctx_switch(current_thread->context, next_thread->context);
+        current_thread = next_thread;
+    }
+    /* TODO Phase 2 */
 }
 
 void uthread_exit(void)
 {
-	/* TODO Phase 2 */
+    current_thread->state = Zombie;
+    queue_enqueue(zombie_queue, current_thread);
+    uthread_ctx_destroy_stack(current_thread->stack);
+    queue_dequeue(ready_queue, (void**)&current_thread);
+
 }
 
 int uthread_create(uthread_func_t func, void *arg)
 {
-	/* TODO Phase 2 */
+    //intialize the thread
+	thread *curr_thread = intialize_thread(Ready);
+    int status = uthread_ctx_init(curr_thread->context, curr_thread->stack, func, arg);
+
+    //checks if there is a context error
+    if(status == -1){
+        return -1;
+    }
+
+    queue_enqueue(ready_queue,curr_thread);
+    return 0;
 }
 
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-	/* TODO Phase 2 */
+    if(preempt){
+        printf("yo");
+    }
+    
+    current_thread = intialize_thread(Running);
+    ready_queue = queue_create();
+    zombie_queue = queue_create();
+
+    int status = uthread_create(func,arg);
+    if(ready_queue == NULL || status == -1 ){
+        return -1;
+    }
+
+    while(queue_length(ready_queue)){
+        uthread_yield();
+    }
+
+    return 0;
 }
 
-void uthread_block(void)
-{
-	/* TODO Phase 3 */
-}
-
-void uthread_unblock(struct uthread_tcb *uthread)
-{
-	/* TODO Phase 3 */
-}
 

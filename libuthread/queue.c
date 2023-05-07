@@ -62,7 +62,6 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->last->next = NULL; 
 		queue->first->next = queue->last; // update first so its next points to last
 		queue->last->prev = queue->first; // update last so its prev points to first
-        queue->length++;
     
 	}
 
@@ -71,10 +70,9 @@ int queue_enqueue(queue_t queue, void *data)
 		queue->last->next->data = data;
 		queue->last->next->prev = queue->last;
 		queue->last = queue->last->next;
-        queue->length++;
 
 	}
-    
+    queue->length++;
 	return 0;
 }
 
@@ -88,10 +86,10 @@ int queue_dequeue(queue_t queue, void **data)
 	*data = queue->last->data;
     // case 1: 1 element in queue
     if (queue->first == queue->last) {
-        queue->length--;
 	    free(queue->last);
         queue->last = NULL;
         queue->first = NULL;
+        queue->length = 0;
     }
     else {
         queue->last = queue->last->prev;
@@ -124,6 +122,7 @@ int queue_delete(queue_t queue, void *data) {
             }
 
             free(curr);
+            queue->length--;
             return 0;
         }
 

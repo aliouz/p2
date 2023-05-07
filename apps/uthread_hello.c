@@ -19,7 +19,7 @@ void hello(void *arg)
 
 int main(void)
 {
-	uthread_run(false, hello, NULL);
-
+	int status = uthread_run(false, hello, NULL);
+	printf("%d\n",status);
 	return 0;
 }
