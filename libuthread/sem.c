@@ -13,7 +13,7 @@ typedef struct semaphore {
 
 sem_t sem_create(size_t count)
 {
-	semaphore sem = malloc(sizeof(semaphore));
+	semaphore *sem = malloc(sizeof(semaphore));
 	if(!sem){
 		return NULL;
 	}
@@ -37,13 +37,33 @@ int sem_destroy(sem_t sem)
 
 }
 
+
 int sem_down(sem_t sem)
 {
-	/* TODO Phase 3 */
+	if (sem == NULL) {
+		return -1;
+	}
+	if (sem->resource_count < 1) {
+		queue_enqueue(sem->thread_wait, uthread_current);
+		uthread_block();
+	}
+	sem->resource_count -= 1;
+	return 0;
+	
 }
 
 int sem_up(sem_t sem)
 {
+	if (sem == NULL) {
+		return -1;
+	}
+	sem->resource_count += 1;
+	if(queue_length(sem->thread_wait) > 0) {
+		struct uthread_tcb *uthread = NULL;
+		queue_dequeue(sem->thread_wait, (void**)(uthread));
+		uthread_unblock(uthread);
+	}
+	return 0;
 	/* TODO Phase 3 */
 }
 

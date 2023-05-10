@@ -2,7 +2,11 @@
 programs := \
 	queue_tester_example.x \
 	uthread_hello.x \
-	uthread_yield.x
+	uthread_yield.x \
+	sem_buffer.x \
+	sem_count.x \
+	sem_prime.x
+
 
 # User-level thread library
 UTHREADLIB := libuthread
@@ -65,6 +69,8 @@ $(libuthread): FORCE
 %.o: %.c
 	@echo "CC	$@"
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
+
+
 
 # Cleaning rule
 clean: FORCE

@@ -83,18 +83,19 @@ int queue_dequeue(queue_t queue, void **data)
 		return -1;
 	}
     
-	*data = queue->last->data;
+	*data = queue->first->data;
     // case 1: 1 element in queue
     if (queue->first == queue->last) {
-	    free(queue->last);
+	    free(queue->first);
         queue->last = NULL;
         queue->first = NULL;
         queue->length = 0;
     }
     else {
-        queue->last = queue->last->prev;
+        queue->first = queue->first->next;
         queue->length--;
-        free(queue->last->next);
+        free(queue->first->prev);
+        queue->first->prev = NULL;
     }
 	return 0;
 
@@ -131,6 +132,7 @@ int queue_delete(queue_t queue, void *data) {
 
     return -1; // Data not found in queue
 }
+
 
 
 int queue_iterate(queue_t queue, queue_func_t func)
