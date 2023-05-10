@@ -44,7 +44,7 @@ int sem_down(sem_t sem)
 		return -1;
 	}
 	if (sem->resource_count < 1) {
-		queue_enqueue(sem->thread_wait, uthread_current);
+		queue_enqueue(sem->thread_wait, uthread_current());
 		uthread_block();
 	}
 	sem->resource_count -= 1;
@@ -60,7 +60,7 @@ int sem_up(sem_t sem)
 	sem->resource_count += 1;
 	if(queue_length(sem->thread_wait) > 0) {
 		struct uthread_tcb *uthread = NULL;
-		queue_dequeue(sem->thread_wait, (void**)(uthread));
+		queue_dequeue(sem->thread_wait, (void**)&uthread);
 		uthread_unblock(uthread);
 	}
 	return 0;

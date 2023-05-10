@@ -41,40 +41,18 @@ void uthread_yield(void)
 {
     if (queue_length(ready_queue) != 0) {
         thread *next_thread;
-        //printf("current before queue: %p \n", (void*)current_thread );
-        //printQueue();
+
         queue_dequeue(ready_queue, (void**)&next_thread);
-       // printf(">>>>>>> \n%p \n", (void*)next_thread );
-       // printf("| %p \n >>>>>>>> \n", (void*)current_thread );
         queue_enqueue(ready_queue, current_thread);
-       // printQueue();
+     
         thread *temp_thread = current_thread;
         current_thread = next_thread;
-       // printf("current after queue: %p \n ---------- \n", (void*)current_thread );
-        uthread_ctx_switch(temp_thread->context, current_thread->context);
-        
-        
+      
+        uthread_ctx_switch(temp_thread->context, current_thread->context);   
     }
-    /* TODO Phase 2 */
-}
-/*
-static void print(queue_t q, void *data)
-{
-    q = q;
-    printf("%p\n",data);
+    
 }
 
-void printReadQueue() {
-    printf("%d\n", queue_length(ready_queue));
-}
-
-
-
-void printQueue() {
-    queue_iterate(ready_queue,print);
-    printf("--------\n");
-}
-*/
 
 void uthread_exit(void)
 {
@@ -123,7 +101,7 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
     zombie_queue = queue_create();
 
     int status = uthread_create(func,arg);
-    if(ready_queue == NULL || status == -1 ){
+    if(!ready_queue || status){
         return -1;
     }
 

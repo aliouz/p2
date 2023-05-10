@@ -5,7 +5,9 @@ programs := \
 	uthread_yield.x \
 	sem_buffer.x \
 	sem_count.x \
-	sem_prime.x
+	sem_prime.x \
+	sem_simple.x \
+	sem_buffer.x
 
 
 # User-level thread library
