@@ -28,12 +28,20 @@ void sig_handler(int signum){
 
 void preempt_disable(void)
 {
-	/* TODO Phase 4 */
+    /* TODO Phase 4 */
+    sigset_t ss;
+    sigemptyset(&ss);
+    sigaddset(&ss, SIGVTALRM);
+    pthread_sigmask(SIG_UNBLOCK, &ss, NULL);
 }
 
 void preempt_enable(void)
 {
-	/* TODO Phase 4 */
+    /* TODO Phase 4 */
+    sigset_t ss;
+    sigemptyset(&ss);
+    sigaddset(&ss, SIGVTALRM);
+    pthread_sigmask(SIG_BLOCK, &ss, NULL);
 }
 
 void preempt_start(bool preempt)

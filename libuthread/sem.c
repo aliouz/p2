@@ -43,7 +43,7 @@ int sem_down(sem_t sem)
 	if (sem == NULL) {
 		return -1;
 	}
-	if (sem->resource_count < 1) {
+	while (sem->resource_count < 1) {
 		queue_enqueue(sem->thread_wait, uthread_current());
 		uthread_block();
 	}
