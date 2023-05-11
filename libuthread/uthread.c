@@ -101,6 +101,7 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
     zombie_queue = queue_create();
 
     int status = uthread_create(func,arg);
+    //if ready queue is null or status is anything other than 0 return
     if(!ready_queue || status){
         return -1;
     }
