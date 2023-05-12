@@ -30,6 +30,7 @@ void test_queue_simple(void)
 	queue_t q;
 
 	fprintf(stderr, "*** TEST queue_simple ***\n");
+	//ptr = &data;
 	q = queue_create();
 	queue_enqueue(q, &data);
 	queue_dequeue(q, (void**)&ptr);
@@ -86,11 +87,22 @@ void test_iterator(void)
     assert(queue_length(q) == 9);
 }
 
+void test_dequeue(){
+	queue_t queue;
+	queue = queue_create();
+
+	int data = 3, *ptr;
+	ptr = &data;
+	TEST_ASSERT(queue_dequeue(queue,(void**)&ptr) == -1);
+
+}
+
 int main(void)
 {
 	test_create();
 	test_queue_simple();
 	test_destroy();
 	test_iterator();
+	test_dequeue();
 	return 0;
 }
