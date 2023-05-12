@@ -29,6 +29,7 @@ thread *uthread_current(void)
     return current_thread;
 }
 
+//this function is used to intitalze a thread and its memebers
 thread *intialize_thread(int state){
     preempt_disable();
     thread *curr_thread = malloc(sizeof(thread));
@@ -101,7 +102,11 @@ int uthread_create(uthread_func_t func, void *arg)
 
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
+    //if preempt is flase it will return
+    //else it starts preempt
     preempt_start(preempt);
+
+    //initialize the current thread and queues
     current_thread = intialize_thread(Running);
     ready_queue = queue_create();
     zombie_queue = queue_create();
@@ -114,10 +119,13 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
         return -1;
     }
 
+    //goes through ready queue and yields each thread
     while(queue_length(ready_queue)){
         uthread_yield();
         
     }
+
+    //once threads are done running preemption stops
     preempt_stop();
     return 0;
 }

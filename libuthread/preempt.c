@@ -21,7 +21,6 @@ sigset_t ss;
 bool preempt_status;
 
 void sig_handler(int signum){
-
 	if(signum == SIGVTALRM){
 		uthread_yield();
 	}
@@ -43,15 +42,20 @@ void preempt_enable(void)
 
 void preempt_start(bool preempt)
 {
+	//sets global variable so ther functions can access preempt bool
 	preempt_status = preempt;
 	if(!preempt){
 		return;
 	}
+
+	//initialize struct sigaction sa;
 	sa.sa_handler = sig_handler;
 	sigemptyset(&sa.sa_mask);
 	sigaddset(&sa.sa_mask, SIGVTALRM);
 	sa.sa_flags = 0;
 	sigaction(SIGVTALRM, &sa, NULL);
+
+	//initialize and set timer
 	it_new.it_interval.tv_sec = 0;
 	it_new.it_interval.tv_usec = 100 * HZ;
 	it_new.it_value.tv_sec = 0;
@@ -61,8 +65,10 @@ void preempt_start(bool preempt)
 
 void preempt_stop(void)
 {
+	
 	if(preempt_status){
 		preempt_disable();
+		//resets timer
 		setitimer(ITIMER_VIRTUAL, &it, NULL);
 		preempt_status = false;
 	}

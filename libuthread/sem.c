@@ -13,11 +13,15 @@ typedef struct semaphore {
 
 sem_t sem_create(size_t count)
 {
+	//allocate space for struct
 	semaphore *sem = malloc(sizeof(semaphore));
+
+	//if sem is empty then it failed
 	if(!sem){
 		return NULL;
 	}
 
+	//initialize space for memebers of struct
 	sem->resource_count = count;
 	sem->thread_wait = queue_create();
 
@@ -27,10 +31,12 @@ sem_t sem_create(size_t count)
 
 int sem_destroy(sem_t sem)
 {
+	//if sem is empty or there are still threads waiting return error
 	if(!sem || sem->thread_wait){
 		return -1;
 	}
 
+	//free sem and its members
 	queue_destroy(sem->thread_wait);
 	free(sem);
 	return 0;
@@ -43,6 +49,7 @@ int sem_down(sem_t sem)
 	if (sem == NULL) {
 		return -1;
 	}
+
 	preempt_disable();
 	while (sem->resource_count < 1) {
 		queue_enqueue(sem->thread_wait, uthread_current());

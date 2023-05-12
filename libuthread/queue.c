@@ -141,8 +141,10 @@ int queue_iterate(queue_t queue, queue_func_t func)
         return -1;
     
     struct node *curr = queue->first;
+    //when curr == null you are at the end of the queue
     while(curr != NULL){
         void* next = curr->data;
+        //changes curr to the next item in the queue
         curr = curr->next;
         func(queue,next);
     }
