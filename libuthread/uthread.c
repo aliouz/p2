@@ -70,7 +70,7 @@ void uthread_exit(void)
    // queue_dequeue(ready_queue, (void**)&current_thread);
      
     if (queue_length(ready_queue) != 0) {
-        thread *next_thread;
+        thread *next_thread = intialize_thread(Zombie);
         queue_dequeue(ready_queue, (void**)&next_thread);
        
        
@@ -102,8 +102,8 @@ int uthread_create(uthread_func_t func, void *arg)
 
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-    //if preempt is flase it will return
-    //else it starts preempt
+    //if preempt is false it will return
+    //else it starts preemption
     preempt_start(preempt);
 
     //initialize the current thread and queues
