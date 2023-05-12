@@ -30,14 +30,14 @@ void preempt_disable(void)
 {
     sigemptyset(&ss);
     sigaddset(&ss, SIGVTALRM);
-    sigprocmask(SIG_BLOCK, &ss, NULL);
+    sigprocmask(SIG_BLOCK, &ss, NULL); // blocks alarm signal
 }
 
 void preempt_enable(void)
 {
     sigemptyset(&ss);
     sigaddset(&ss, SIGVTALRM);
-    sigprocmask(SIG_UNBLOCK, &ss, NULL);
+    sigprocmask(SIG_UNBLOCK, &ss, NULL); // unblocks alarm signal
 }
 
 void preempt_start(bool preempt)
@@ -47,7 +47,6 @@ void preempt_start(bool preempt)
 	if(!preempt){
 		return;
 	}
-
 	//initialize struct sigaction sa;
 	sa.sa_handler = sig_handler;
 	sigemptyset(&sa.sa_mask);

@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdlib.h>
-
 #include "queue.h"
 #include "sem.h"
 #include "private.h"
@@ -26,7 +25,6 @@ sem_t sem_create(size_t count)
 	sem->thread_wait = queue_create();
 
 	return sem;
-
 }
 
 int sem_destroy(sem_t sem)
@@ -40,17 +38,16 @@ int sem_destroy(sem_t sem)
 	queue_destroy(sem->thread_wait);
 	free(sem);
 	return 0;
-
 }
 
-
+// decrements sem's resource count
 int sem_down(sem_t sem)
 {
 	if (sem == NULL) {
 		return -1;
 	}
-
 	preempt_disable();
+	// if sem resource available
 	while (sem->resource_count < 1) {
 		queue_enqueue(sem->thread_wait, uthread_current());
 		uthread_block();
@@ -58,9 +55,9 @@ int sem_down(sem_t sem)
 	sem->resource_count -= 1;
 	preempt_enable();
 	return 0;
-	
 }
 
+// increments sem's resource count 
 int sem_up(sem_t sem)
 {
 	if (sem == NULL) {
@@ -68,6 +65,7 @@ int sem_up(sem_t sem)
 	}
 	preempt_disable();
 	sem->resource_count += 1;
+	// if queues waiting to use sem
 	if(queue_length(sem->thread_wait) > 0) {
 		struct uthread_tcb *uthread = NULL;
 		queue_dequeue(sem->thread_wait, (void**)&uthread);

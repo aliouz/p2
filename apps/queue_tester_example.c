@@ -19,7 +19,6 @@ do {									\
 void test_create(void)
 {
 	fprintf(stderr, "*** TEST create ***\n");
-
 	TEST_ASSERT(queue_create() != NULL);
 }
 
@@ -38,6 +37,7 @@ void test_queue_simple(void)
 
 }
 
+// checks if the destory function works for all cases
 void test_destroy(void)
 {
 	fprintf(stderr, "*** TEST delete with an unitialized queue ***\n");
@@ -55,11 +55,9 @@ void test_destroy(void)
 
 	queue_dequeue(q, (void**)&ptr);
 	TEST_ASSERT(queue_destroy(q) == 0);
-	
-	
 }
 
-
+// deletes element from queue if the element is a specific value 
 static void iterator_inc(queue_t q, void *data)
 {
     int *a = (int*)data;
@@ -70,6 +68,7 @@ static void iterator_inc(queue_t q, void *data)
         *a += 1;
 }
 
+// checks if the interator function works
 void test_iterator(void)
 {
     queue_t q;
@@ -87,6 +86,7 @@ void test_iterator(void)
     assert(queue_length(q) == 9);
 }
 
+// checks that dequeue works for all cases
 void test_dequeue(){
 	queue_t queue;
 	queue = queue_create();
