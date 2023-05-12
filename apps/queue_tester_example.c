@@ -30,7 +30,6 @@ void test_queue_simple(void)
 	queue_t q;
 
 	fprintf(stderr, "*** TEST queue_simple ***\n");
-	//ptr = &data;
 	q = queue_create();
 	queue_enqueue(q, &data);
 	queue_dequeue(q, (void**)&ptr);

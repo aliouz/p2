@@ -43,11 +43,11 @@ int sem_down(sem_t sem)
 	if (sem == NULL) {
 		return -1;
 	}
+	preempt_disable();
 	while (sem->resource_count < 1) {
 		queue_enqueue(sem->thread_wait, uthread_current());
 		uthread_block();
 	}
-	preempt_disable();
 	sem->resource_count -= 1;
 	preempt_enable();
 	return 0;
@@ -61,12 +61,12 @@ int sem_up(sem_t sem)
 	}
 	preempt_disable();
 	sem->resource_count += 1;
-	preempt_enable();
 	if(queue_length(sem->thread_wait) > 0) {
 		struct uthread_tcb *uthread = NULL;
 		queue_dequeue(sem->thread_wait, (void**)&uthread);
 		uthread_unblock(uthread);
 	}
+	preempt_enable();
 	return 0;
 	/* TODO Phase 3 */
 }

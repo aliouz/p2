@@ -30,27 +30,30 @@ thread *uthread_current(void)
 }
 
 thread *intialize_thread(int state){
+    preempt_disable();
     thread *curr_thread = malloc(sizeof(thread));
     curr_thread->stack = uthread_ctx_alloc_stack();
   
 	curr_thread->state = state;
 	curr_thread->context = malloc(sizeof(uthread_ctx_t));
+    preempt_enable();
     return curr_thread;
 }
 
 void uthread_yield(void)
 {
-    
+    preempt_disable();
     if (queue_length(ready_queue) != 0) {
         thread *next_thread;
-
         queue_dequeue(ready_queue, (void**)&next_thread);
         queue_enqueue(ready_queue, current_thread);
      
         thread *temp_thread = current_thread;
         current_thread = next_thread;
-      
+        preempt_enable();
         uthread_ctx_switch(temp_thread->context, current_thread->context);   
+    } else {
+        preempt_enable();
     }
     
 }
@@ -58,45 +61,47 @@ void uthread_yield(void)
 
 void uthread_exit(void)
 {
+    preempt_disable();
     current_thread->state = Zombie;
     queue_enqueue(zombie_queue, current_thread);
     uthread_ctx_destroy_stack(current_thread->stack);
 
    // queue_dequeue(ready_queue, (void**)&current_thread);
-
-     if (queue_length(ready_queue) != 0) {
+     
+    if (queue_length(ready_queue) != 0) {
         thread *next_thread;
         queue_dequeue(ready_queue, (void**)&next_thread);
        
        
         thread *temp_thread = current_thread;
         current_thread = next_thread;
-       
+        preempt_enable();
         uthread_ctx_switch(temp_thread->context, current_thread->context);
+    } else {
+        preempt_enable();
     }
+    
 
 }
 
 int uthread_create(uthread_func_t func, void *arg)
 {
-    printf("test change\n");
+    preempt_disable();
     //intialize the thread
 	thread *curr_thread = intialize_thread(Ready);
     int status = uthread_ctx_init(curr_thread->context, curr_thread->stack, func, arg);
-
     //checks if there is a context error
     if(status == -1){
         return -1;
     }
-
     queue_enqueue(ready_queue,curr_thread);
+    preempt_enable();
     return 0;
 }
 
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
     preempt_start(preempt);
-    preempt_disable();
     current_thread = intialize_thread(Running);
     ready_queue = queue_create();
     zombie_queue = queue_create();
@@ -113,12 +118,13 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
         uthread_yield();
         
     }
-
+    preempt_stop();
     return 0;
 }
 
 void uthread_block(void)
 {
+    preempt_disable();
     current_thread->state = Blocked;
     if (queue_length(ready_queue) != 0) {
         thread *next_thread;
@@ -127,8 +133,10 @@ void uthread_block(void)
        
         thread *temp_thread = current_thread;
         current_thread = next_thread;
-       
+        preempt_enable();
         uthread_ctx_switch(temp_thread->context, current_thread->context);
+    } else {
+        preempt_enable();
     }
 
 }
@@ -137,7 +145,9 @@ void uthread_unblock(struct uthread_tcb *uthread)
 {
 	/* TODO Phase 3 */
     uthread->state = Ready;
+    preempt_disable();
     queue_enqueue(ready_queue, uthread);
+    preempt_enable();
 }
 
 

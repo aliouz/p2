@@ -29,8 +29,6 @@ void sig_handler(int signum){
 
 void preempt_disable(void)
 {
-    
-    printf("yo I am in disable wtf\n");
     sigemptyset(&ss);
     sigaddset(&ss, SIGVTALRM);
     sigprocmask(SIG_BLOCK, &ss, NULL);
@@ -38,8 +36,6 @@ void preempt_disable(void)
 
 void preempt_enable(void)
 {
-    
-    printf("yo I am in enable wtf\n");
     sigemptyset(&ss);
     sigaddset(&ss, SIGVTALRM);
     sigprocmask(SIG_UNBLOCK, &ss, NULL);
@@ -49,24 +45,18 @@ void preempt_start(bool preempt)
 {
 	preempt_status = preempt;
 	if(!preempt){
-		printf("asdasffa\n");
 		return;
 	}
-	printf("gfd\n");
 	sa.sa_handler = sig_handler;
 	sigemptyset(&sa.sa_mask);
 	sigaddset(&sa.sa_mask, SIGVTALRM);
 	sa.sa_flags = 0;
 	sigaction(SIGVTALRM, &sa, NULL);
-	//sigaction(SIGALRM, &sa, NULL);
-	//sigprocmask(SIG_BLOCK, &sa.sa_mask, NULL);
 	it_new.it_interval.tv_sec = 0;
 	it_new.it_interval.tv_usec = 100 * HZ;
 	it_new.it_value.tv_sec = 0;
 	it_new.it_value.tv_usec = 100 * HZ;
 	setitimer(ITIMER_VIRTUAL, &it_new, &it);
-	//alarm(1);
-	//pause();
 }
 
 void preempt_stop(void)
