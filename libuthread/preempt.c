@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-
+#include <unistd.h>
 #include "private.h"
 #include "uthread.h"
 
@@ -21,6 +21,7 @@ sigset_t ss;
 bool preempt_status;
 
 void sig_handler(int signum){
+
 	if(signum == SIGVTALRM){
 		uthread_yield();
 	}
@@ -28,40 +29,44 @@ void sig_handler(int signum){
 
 void preempt_disable(void)
 {
-    /* TODO Phase 4 */
-    sigset_t ss;
+    
+    printf("yo I am in disable wtf\n");
     sigemptyset(&ss);
     sigaddset(&ss, SIGVTALRM);
-    pthread_sigmask(SIG_UNBLOCK, &ss, NULL);
+    sigprocmask(SIG_BLOCK, &ss, NULL);
 }
 
 void preempt_enable(void)
 {
-    /* TODO Phase 4 */
-    sigset_t ss;
+    
+    printf("yo I am in enable wtf\n");
     sigemptyset(&ss);
     sigaddset(&ss, SIGVTALRM);
-    pthread_sigmask(SIG_BLOCK, &ss, NULL);
+    sigprocmask(SIG_UNBLOCK, &ss, NULL);
 }
 
 void preempt_start(bool preempt)
 {
 	preempt_status = preempt;
 	if(!preempt){
+		printf("asdasffa\n");
 		return;
 	}
-
-	sa.sig_handler = &sig_handler;
+	printf("gfd\n");
+	sa.sa_handler = sig_handler;
 	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, SIGVTALRM);
 	sa.sa_flags = 0;
-	sigaction(SIGVTALRM, &sa.sa_mask, NULL);
-
+	sigaction(SIGVTALRM, &sa, NULL);
+	//sigaction(SIGALRM, &sa, NULL);
+	//sigprocmask(SIG_BLOCK, &sa.sa_mask, NULL);
 	it_new.it_interval.tv_sec = 0;
 	it_new.it_interval.tv_usec = 100 * HZ;
 	it_new.it_value.tv_sec = 0;
 	it_new.it_value.tv_usec = 100 * HZ;
 	setitimer(ITIMER_VIRTUAL, &it_new, &it);
-	
+	//alarm(1);
+	//pause();
 }
 
 void preempt_stop(void)
@@ -69,7 +74,6 @@ void preempt_stop(void)
 	if(preempt_status){
 		preempt_disable();
 		setitimer(ITIMER_VIRTUAL, &it, NULL);
-		sigaction(SIGVTALRM, &sa, NULL)
 		preempt_status = false;
 	}
 }

@@ -14,6 +14,7 @@ enum threadState {Ready, Running, Blocked, Zombie};
 
 queue_t ready_queue;
 queue_t zombie_queue;
+bool isPreempt;
 
 typedef struct uthread_tcb {
 	void *stack;
@@ -39,6 +40,7 @@ thread *intialize_thread(int state){
 
 void uthread_yield(void)
 {
+    
     if (queue_length(ready_queue) != 0) {
         thread *next_thread;
 
@@ -77,6 +79,7 @@ void uthread_exit(void)
 
 int uthread_create(uthread_func_t func, void *arg)
 {
+    printf("test change\n");
     //intialize the thread
 	thread *curr_thread = intialize_thread(Ready);
     int status = uthread_ctx_init(curr_thread->context, curr_thread->stack, func, arg);
@@ -92,15 +95,15 @@ int uthread_create(uthread_func_t func, void *arg)
 
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-    if(preempt){
-        printf("yo");
-    }
-    
+    preempt_start(preempt);
+    preempt_disable();
     current_thread = intialize_thread(Running);
     ready_queue = queue_create();
     zombie_queue = queue_create();
 
     int status = uthread_create(func,arg);
+
+      
     //if ready queue is null or status is anything other than 0 return
     if(!ready_queue || status){
         return -1;
